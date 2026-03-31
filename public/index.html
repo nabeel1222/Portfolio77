@@ -150,7 +150,9 @@ h2 {
         <textarea id="message" placeholder="Your Message"></textarea>
         <button type="submit">Send</button>
     </form>
-
+<div id="successMessage" style="display:none; color:green; margin-top:10px; font-weight:bold;">
+    ✅ Your message has been saved successfully!
+</div>
     <div id="output">
         <h3>Saved Submissions:</h3>
     </div>
@@ -165,7 +167,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const saved = JSON.parse(localStorage.getItem("submissions")) || [];
     saved.forEach(entry => addToUI(entry.name, entry.email, entry.message));
 
-    form.addEventListener("submit", async (e) => {
+    
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const message = document.getElementById("message").value.trim();
+    const successMsg = document.getElementById("successMessage");
+
+    if (!name || !email) return;
+
+    let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+    submissions.push({ name, email, message });
+    localStorage.setItem("submissions", JSON.stringify(submissions));
+
+    addToUI(name, email, message);
+
+    try {
+        const res = await fetch("/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, message })
+        });
+
+        successMsg.style.display = "block";
+
+        setTimeout(() => {
+            successMsg.style.display = "none";
+        }, 3000);
+
+    } catch (err) {
+        console.log(err);
+    }
+
+    form.reset();
+});
         e.preventDefault();
 
         const name = document.getElementById("name").value.trim();
@@ -181,7 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
         addToUI(name, email, message);
 
         try {
-            await fetch("/submit", {
+            await 
+            fetch("/submit", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, message })
@@ -219,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
             animateSkills();
         }
     });
-});
+
 </script>
 
 </body>
